@@ -64,7 +64,29 @@ public class sqlDealWeather {
         }
 
     }
+    
+    
+     public void SelectWeatherDate() {
+        String sql = "select *from weather where id="+id;
+        //该语句为每个 IN 参数保留一个问号（“？”）作为占位符
+        Connection conn = null;				//和数据库取得连接
+        PreparedStatement pstmt = null;		//创建statement
+        try{
+            conn = this.getConnection();
+            pstmt=conn.prepareStatement(sql);
+            ResultSet y = pstmt.executeQuery();
+            while(y.next())
+            System.out.println(y.getString("fxDate")+" 城市编号>>"+y.getInt("id")+" 最高气温>>"+y.getString("tempMax")+"℃ 最低气温>>"+y.getString("tempMin")+"℃ "+y.getString("textDay"));
 
+        }catch(SQLException e){
+            e.printStackTrace();
+        } finally{
+            this.close(pstmt);
+            this.close(conn);		//必须关闭
+        }
+    }
+    
+    
     public void replaceWeather()
     {
         String sql = "replace into weather(fxDate,id,tempMax,tempMin,textDay) values(?,?,?,?,?)";
