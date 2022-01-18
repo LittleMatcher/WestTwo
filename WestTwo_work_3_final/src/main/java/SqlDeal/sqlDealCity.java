@@ -1,6 +1,7 @@
 package SqlDeal;
 
 import java.sql.*;
+import java.util.Scanner;
 
 public class sqlDealCity {
 
@@ -14,12 +15,12 @@ public class sqlDealCity {
 
 
 
-        public sqlDealCity(String name, int id, String lon, String lat) throws SQLIntegrityConstraintViolationException {
+        public sqlDealCity(String name, int id, String lon, String lat) throws java.sql.SQLIntegrityConstraintViolationException {
             this.name = name;
             this.id = id;
             this.lon = lon;
             this.lat = lat;
-            this.addCityDate();
+            this.replaceWeather();
         }
         /**
          * 取得数据库的连接
@@ -39,9 +40,56 @@ public class sqlDealCity {
             }
             return conn;
         }
+    public void SelectCityDate() {
+        Scanner scanner= new Scanner(System.in);
+        int IDD= scanner.nextInt();
+        String sql = "select *from city where city_id="+IDD;
+        //该语句为每个 IN 参数保留一个问号（“？”）作为占位符
+        Connection conn = null;				//和数据库取得连接
+        PreparedStatement pstmt = null;		//创建statement
+        try{
+            conn = this.getConnection();
+            pstmt=conn.prepareStatement(sql);
+            ResultSet y = pstmt.executeQuery();
+            while(y.next())
+                System.out.println(y.getString("city_name")+" 城市编号>>"+y.getInt("city_id")+" 经度>>"+y.getString("city_longitude")+" 纬度>>"+y.getString("city_latitude"));
 
+        }catch(SQLException e){
+            e.printStackTrace();
+        } finally{
+            this.close(pstmt);
+            this.close(conn);		//必须关闭
+        }
+    }
+    public void replaceWeather()
+    {
+        String sql = "replace into city(city_name,city_longitude,city_latitude,city_id) values(?,?,?,?)";
+        //该语句为每个 IN 参数保留一个问号（“？”）作为占位符
+        Connection conn = null;				//和数据库取得连接
+        PreparedStatement pstmt = null;		//创建statement
+        try{
+            conn = this.getConnection();
+            pstmt = (PreparedStatement) conn.prepareStatement(sql);
 
-        public void addCityDate() {
+            pstmt.setString(1, name);//给占位符赋值
+            pstmt.setString(2, lon);
+            pstmt.setString(3, lat);
+            pstmt.setInt(4, id);
+            try {
+                pstmt.executeUpdate();
+            }catch (java.sql.SQLIntegrityConstraintViolationException e)
+            {
+                throw e;
+            }
+            //执行
+        }catch(SQLException e){
+            e.printStackTrace();
+        } finally{
+            this.close(pstmt);
+            this.close(conn);		//必须关闭
+        }
+    }
+        public void addCityDate() throws java.sql.SQLIntegrityConstraintViolationException{
             String sql = "insert into city(city_name,city_longitude,city_latitude,city_id) values(?,?,?,?)";
             //该语句为每个 IN 参数保留一个问号（“？”）作为占位符
             Connection conn = null;				//和数据库取得连接
@@ -54,12 +102,8 @@ public class sqlDealCity {
                 pstmt.setString(2, lon);
                 pstmt.setString(3, lat);
                 pstmt.setInt(4, id);
-                try {
-                    pstmt.executeUpdate();
-                }catch (java.sql.SQLIntegrityConstraintViolationException e)
-                {
-                    throw e;
-                }
+                pstmt.executeUpdate();
+
                 //执行
             }catch(SQLException e){
                 e.printStackTrace();
